@@ -1,38 +1,42 @@
 
 
-## Plan: Build Players and Teams Pages
+## Plan: Build Matches Page with Create Form and Match History
 
 ### Summary
-Replace the placeholder Players and Teams pages with full-featured pages that show player/team cards in a grid, with click-to-open modals displaying detailed stats fetched from Supabase views.
+Replace the placeholder Matches page with two sections: a match creation form (player selection dropdowns with avatars, score inputs with +/- buttons) and a match history table fetched from `match_detail`.
 
 ### What changes
 
-**1. Rewrite `src/routes/players.tsx`**
-- Reuse the Navbar component from index.tsx by extracting it to `src/components/Navbar.tsx` (shared across all routes)
-- Fetch all rows from `players` table on mount
-- Display a responsive grid of profile cards: 80px circular avatar + player name
-- On card click, open a Dialog/Sheet modal that fetches:
-  - `player_stats` (matches played/won/lost, win %, AMP)
-  - `player_partner_stats` (best = max wins_together, worst = max losses_together) with partner avatar from `players`
-  - `player_opponent_stats` (best = max wins_vs, worst = max losses_vs) with opponent avatar from `players`
-  - `player_best_worst_matches` joined with `match_detail` for best/worst match scores and opponent names
+**1. Rewrite `src/routes/matches.tsx`**
 
-**2. Rewrite `src/routes/teams.tsx`**
-- Fetch all rows from `team_stats`
-- Display grid of team cards: two 60px circular avatars side-by-side + both player names
-- Avatars fetched by looking up player1_id/player2_id in `players` table
-- On card click, open a Dialog modal that fetches:
-  - Team stats from `team_stats` row (matches, win %, AMP, best/worst margin)
-  - `team_opponent_stats` where team_player1_id/team_player2_id match (best = max wins_vs, worst = max losses_vs)
+**Section A — Create New Match**
+- Fetch all players from `players` table on mount (id, name, avatar_url)
+- Four `Select` dropdowns (Team 1 Player 1/2, Team 2 Player 1/2) showing circular avatar + name in each option
+- Validation: prevent selecting the same player in multiple slots
+- Two score inputs side-by-side, each with increment/decrement buttons and direct number editing (min 0, max 30)
+- "Submit Match" button that:
+  - Inserts into `matches`: status='completed', team1_score, team2_score, winning_team (higher score team), played_at=now()
+  - Inserts 4 rows into `match_players`: one per player with match_id and team_number
+  - Refreshes match history after success
+  - Shows toast on success/error
 
-**3. Extract shared Navbar to `src/components/Navbar.tsx`**
-- Move the Navbar and NAV_LINKS from index.tsx to a shared component
-- Import in index.tsx, players.tsx, teams.tsx, matches.tsx
+**Section B — Match History**
+- Fetch from `match_detail` ordered by `played_at DESC`
+- Table columns: `#` (row number counting total down to 1, so newest = highest number), Team 1 (two 36px circular avatars + names like "Dev & Mayank"), Score (bold winning team's score), Team 2 (same format), Date (formatted as "Apr 3")
+- Winning team column gets subtle highlight (slightly bolder text or accent color)
+- Alternating row shading
+
+**2. Update `src/components/PlayerAvatar.tsx`**
+- Add fallback showing player's initial letter (grey circle) instead of generic User icon when avatar_url is null but name is provided
+
+**3. No database changes needed**
+- All tables (`matches`, `match_players`, `match_detail`, `players`) already exist with public RLS policies
 
 ### Technical details
-- Use shadcn `Dialog` for modals, existing `Table` for stat rows
-- Reuse `PlayerAvatar` component (extract to shared component or inline)
-- All views have public read RLS, no auth needed
-- Partner/opponent avatars: since `player_partner_stats` and `player_opponent_stats` have player IDs but no avatar_url, do a secondary lookup against the `players` table (fetched once and cached in state)
-- `player_best_worst_matches` has match_id but no opponent info — join with `match_detail` view to get team names and scores
+- Use shadcn `Select` for player dropdowns with custom option rendering (avatar + name)
+- Score inputs: controlled number inputs with `Button` for +/- arrows
+- Date formatting: use `toLocaleDateString` with month short format
+- Match number calculation: `totalMatches - index` where index is position in the DESC-sorted array
+- Player avatar lookup: fetch players once, build a map of id → {name, avatar_url} for use in both form and history table
+- `match_detail` view already provides all needed fields (player names, IDs, scores, played_at)
 
