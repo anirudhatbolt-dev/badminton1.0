@@ -43,7 +43,7 @@ export function Navbar() {
       </div>
 
       {open && (
-        <div className="md:hidden fixed inset-0 top-14 z-40 bg-background/95 backdrop-blur">
+        <div className="md:hidden fixed inset-0 top-14 z-40 bg-background">
           <div className="flex flex-col gap-2 p-6">
             {NAV_LINKS.map((l) => (
               <Link
