@@ -1,37 +1,38 @@
 
 
-## Plan: Rebuild homepage as Gigaminton badminton tracker
+## Plan: Build Players and Teams Pages
 
 ### Summary
-Replace the inventory management landing page with a badminton stats app. New navbar with "Gigaminton" branding and four route links, hero section with custom image and copy, and a rankings section with three filterable tabs pulling data from Supabase.
+Replace the placeholder Players and Teams pages with full-featured pages that show player/team cards in a grid, with click-to-open modals displaying detailed stats fetched from Supabase views.
 
 ### What changes
 
-**1. New route files**
-- Create `src/routes/players.tsx`, `src/routes/teams.tsx`, `src/routes/matches.tsx` as placeholder pages (simple heading + "Coming soon")
+**1. Rewrite `src/routes/players.tsx`**
+- Reuse the Navbar component from index.tsx by extracting it to `src/components/Navbar.tsx` (shared across all routes)
+- Fetch all rows from `players` table on mount
+- Display a responsive grid of profile cards: 80px circular avatar + player name
+- On card click, open a Dialog/Sheet modal that fetches:
+  - `player_stats` (matches played/won/lost, win %, AMP)
+  - `player_partner_stats` (best = max wins_together, worst = max losses_together) with partner avatar from `players`
+  - `player_opponent_stats` (best = max wins_vs, worst = max losses_vs) with opponent avatar from `players`
+  - `player_best_worst_matches` joined with `match_detail` for best/worst match scores and opponent names
 
-**2. Rewrite `src/routes/index.tsx`**
-- Remove all inventory-related content (solutions, features, capabilities, browser frames, feature tabs, scroll reveal sections)
-- **Navbar**: "Gigaminton" bold text top-left, center links (Rankings `/`, Players `/players`, Teams `/teams`, Matches `/matches`), mobile hamburger opening a sidebar with the same four links. No "Try Demo" button.
-- **Hero**: Image from the Supabase storage URL (full size, no crop), title and description as specified, green CTA "Create Match" linking to `/matches`
-- **Rankings section**: Three tabs (AMP, Win %, Wins with Mihir) using shadcn Tabs component
-  - Tab 1 (AMP): Query `player_stats` sorted by `avg_match_points` DESC → columns: Player (avatar + name), Matches, AMP
-  - Tab 2 (Win %): Query `player_stats` sorted by `win_pct` DESC → columns: Player, Matches Played, Matches Won, Win %
-  - Tab 3 (Wins with Mihir): Query `partner_filtered_ranking` where `partner_name = 'Mihir'` sorted by `wins_together` DESC → columns: Player, Matches Played, Matches Won, Win %
-  - Player column: 36px circular avatar from `avatar_url` (fetched by joining/looking up `players` table), fallback to a `User` icon
-- Data fetched client-side via `supabase.from(...)` queries using React state/useEffect
+**2. Rewrite `src/routes/teams.tsx`**
+- Fetch all rows from `team_stats`
+- Display grid of team cards: two 60px circular avatars side-by-side + both player names
+- Avatars fetched by looking up player1_id/player2_id in `players` table
+- On card click, open a Dialog modal that fetches:
+  - Team stats from `team_stats` row (matches, win %, AMP, best/worst margin)
+  - `team_opponent_stats` where team_player1_id/team_player2_id match (best = max wins_vs, worst = max losses_vs)
 
-**3. Update `src/routes/__root.tsx`**
-- Change title meta from "Stackwise" to "Gigaminton"
-
-**4. Files removed/cleaned**
-- Remove unused imports (demo hooks, scroll reveal, inventory assets) from index.tsx
-- The `/app` layout and its child routes remain untouched for now
+**3. Extract shared Navbar to `src/components/Navbar.tsx`**
+- Move the Navbar and NAV_LINKS from index.tsx to a shared component
+- Import in index.tsx, players.tsx, teams.tsx, matches.tsx
 
 ### Technical details
-- Uses existing `supabase` client from `@/integrations/supabase/client`
-- Uses existing shadcn `Tabs`, `Table` components
-- Player avatars: for `player_stats` view which already has `avatar_url`, use it directly; for `partner_filtered_ranking` which lacks `avatar_url`, join with `players` table client-side or do a separate lookup
-- All RLS policies are public read, so no auth needed
-- Mobile sidebar: simple sheet/drawer with nav links, triggered by hamburger icon
+- Use shadcn `Dialog` for modals, existing `Table` for stat rows
+- Reuse `PlayerAvatar` component (extract to shared component or inline)
+- All views have public read RLS, no auth needed
+- Partner/opponent avatars: since `player_partner_stats` and `player_opponent_stats` have player IDs but no avatar_url, do a secondary lookup against the `players` table (fetched once and cached in state)
+- `player_best_worst_matches` has match_id but no opponent info — join with `match_detail` view to get team names and scores
 
