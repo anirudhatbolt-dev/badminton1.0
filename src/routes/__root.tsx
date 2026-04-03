@@ -21,7 +21,7 @@ export const Route = createRootRoute({
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Lovable" },
       { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ce8fd1f7-8ca4-425d-a29c-052d48d54d68/id-preview-991ef288--eaf13a24-9d23-4ea5-ae81-bd8ed9669775.lovable.app-1774415671292.png" },
-      { name: "twitter:title", content: "Stackwise" },
+      { name: "twitter:title", content: "Gigaminton" },
       { name: "twitter:description", content: "Manage inventory with real-time stock tracking, supplier management, purchase orders, and AI-powered demand forecasting. Includes role-based access, barcode sup" },
     ],
     links: [
