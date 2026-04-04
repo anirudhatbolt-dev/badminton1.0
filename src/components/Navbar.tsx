@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
 
 const NAV_LINKS = [
-  { label: "Rankings", to: "/" as const },
+  { label: "Home", to: "/" as const },
   { label: "Players", to: "/players" as const },
   { label: "Teams", to: "/teams" as const },
   { label: "Matches", to: "/matches" as const },
