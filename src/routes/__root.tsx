@@ -1,7 +1,7 @@
 import { Outlet, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { DemoProvider } from "@/contexts/DemoContext";
 import { RoleProvider } from "@/contexts/RoleContext";
-import { Toaster } from "@/components/ui/sonner";
+// import { Toaster } from "@/components/ui/sonner";
 import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 
 import appCss from "../styles.css?url";
@@ -56,7 +56,7 @@ function RootComponent() {
         <ErrorBoundary>
           <Outlet />
         </ErrorBoundary>
-        <Toaster position="bottom-right" richColors />
+        {/* <Toaster position="bottom-right" richColors /> */}
       </RoleProvider>
     </DemoProvider>
   );
