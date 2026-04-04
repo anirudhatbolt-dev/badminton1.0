@@ -2,9 +2,7 @@
   "buildCommand": "vite build",
   "outputDirectory": "dist",
   "framework": null,
-  "functions": {
-    "dist/server/**/*.js": {
-      "runtime": "nodejs20.x"
-    }
-  }
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }
