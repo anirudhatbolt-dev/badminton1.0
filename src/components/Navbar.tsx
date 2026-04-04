@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
 
 const NAV_LINKS = [
-  { label: "Rankings", to: "/" as const },
+  { label: "Home", to: "/" as const },
   { label: "Players", to: "/players" as const },
   { label: "Teams", to: "/teams" as const },
   { label: "Matches", to: "/matches" as const },
@@ -43,7 +43,7 @@ export function Navbar() {
       </div>
 
       {open && (
-        <div className="md:hidden fixed inset-0 top-14 z-40 bg-background">
+        <div className="md:hidden fixed inset-0 top-14 z-[100] bg-background">
           <div className="flex flex-col gap-2 p-6">
             {NAV_LINKS.map((l) => (
               <Link

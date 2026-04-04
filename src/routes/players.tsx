@@ -211,10 +211,10 @@ function PlayersPage() {
             <button
               key={p.id}
               onClick={() => openModal(p)}
-              className="flex flex-col items-center gap-2 rounded-xl border bg-card p-4 hover:bg-accent/50 transition-colors cursor-pointer"
+              className="flex flex-col items-center gap-3 rounded-xl border bg-card p-6 hover:bg-accent/50 transition-colors cursor-pointer"
             >
-              <PlayerAvatar url={p.avatar_url} name={p.name} size={80} />
-              <span className="font-medium text-sm text-center">{p.name}</span>
+              <PlayerAvatar url={p.avatar_url} name={p.name} size={96} />
+              <span className="font-medium text-base text-center">{p.name}</span>
             </button>
           ))}
         </div>

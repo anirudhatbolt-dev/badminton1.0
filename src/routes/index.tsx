@@ -73,7 +73,7 @@ function HomePage() {
         <img
           src="https://oyrmjcztuwcnulkwjscl.supabase.co/storage/v1/object/public/Badminton/Gigachad-Transparent.png"
           alt="Gigachad Badminton"
-          className="w-full max-w-md"
+          className="w-full max-w-xs"
         />
         <h1 className="text-3xl md:text-4xl font-extrabold leading-tight">
           Welcome Chad, play like you would put the Bad in Badminton

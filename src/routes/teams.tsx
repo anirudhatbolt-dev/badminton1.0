@@ -9,7 +9,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Loader2 } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import {
+  Table, TableHeader, TableRow, TableHead, TableBody, TableCell,
+} from "@/components/ui/table";
+import { Loader2, Trophy, Percent } from "lucide-react";
 
 export const Route = createFileRoute("/teams")({
   component: TeamsPage,
@@ -42,6 +46,26 @@ type TeamOpponentStat = {
   win_pct_vs: number | null;
 };
 
+type MatchDetailRow = {
+  match_id: string | null;
+  team1_player1_id: string | null;
+  team1_player2_id: string | null;
+  team2_player1_id: string | null;
+  team2_player2_id: string | null;
+  team1_player1_name: string | null;
+  team1_player2_name: string | null;
+  team2_player1_name: string | null;
+  team2_player2_name: string | null;
+  team1_score: number | null;
+  team2_score: number | null;
+};
+
+type BestWorstGame = {
+  theirScore: number;
+  oppScore: number;
+  oppNames: string;
+} | null;
+
 function StatItem({ label, value }: { label: string; value: string | number }) {
   return (
     <div className="flex justify-between py-1.5 border-b border-border/50 last:border-0">
@@ -51,11 +75,51 @@ function StatItem({ label, value }: { label: string; value: string | number }) {
   );
 }
 
+function computeBestWorst(
+  matches: MatchDetailRow[],
+  p1Id: string,
+  p2Id: string
+): { best: BestWorstGame; worst: BestWorstGame } {
+  const teamMatches: { theirScore: number; oppScore: number; oppNames: string; margin: number }[] = [];
+
+  for (const m of matches) {
+    const t1ids = new Set([m.team1_player1_id, m.team1_player2_id]);
+    const t2ids = new Set([m.team2_player1_id, m.team2_player2_id]);
+
+    if (t1ids.has(p1Id) && t1ids.has(p2Id) && m.team1_score != null && m.team2_score != null) {
+      teamMatches.push({
+        theirScore: m.team1_score,
+        oppScore: m.team2_score,
+        oppNames: [m.team2_player1_name, m.team2_player2_name].filter(Boolean).join(" & "),
+        margin: m.team1_score - m.team2_score,
+      });
+    } else if (t2ids.has(p1Id) && t2ids.has(p2Id) && m.team1_score != null && m.team2_score != null) {
+      teamMatches.push({
+        theirScore: m.team2_score,
+        oppScore: m.team1_score,
+        oppNames: [m.team1_player1_name, m.team1_player2_name].filter(Boolean).join(" & "),
+        margin: m.team2_score - m.team1_score,
+      });
+    }
+  }
+
+  if (!teamMatches.length) return { best: null, worst: null };
+
+  const best = teamMatches.reduce((a, b) => (b.margin > a.margin ? b : a));
+  const worst = teamMatches.reduce((a, b) => (b.margin < a.margin ? b : a));
+
+  return {
+    best: { theirScore: best.theirScore, oppScore: best.oppScore, oppNames: best.oppNames },
+    worst: { theirScore: worst.theirScore, oppScore: worst.oppScore, oppNames: worst.oppNames },
+  };
+}
+
 function TeamsPage() {
   const [teams, setTeams] = useState<TeamStat[]>([]);
   const [avatarMap, setAvatarMap] = useState<Record<string, string | null>>({});
   const [selected, setSelected] = useState<TeamStat | null>(null);
   const [oppData, setOppData] = useState<{ best: TeamOpponentStat | null; worst: TeamOpponentStat | null } | null>(null);
+  const [bestWorst, setBestWorst] = useState<{ best: BestWorstGame; worst: BestWorstGame } | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -91,14 +155,21 @@ function TeamsPage() {
     setSelected(team);
     setLoading(true);
     setOppData(null);
+    setBestWorst(null);
 
-    const { data } = await supabase
-      .from("team_opponent_stats")
-      .select("*")
-      .eq("team_player1_id", team.player1_id!)
-      .eq("team_player2_id", team.player2_id!);
+    const [oppRes, matchRes] = await Promise.all([
+      supabase
+        .from("team_opponent_stats")
+        .select("*")
+        .eq("team_player1_id", team.player1_id!)
+        .eq("team_player2_id", team.player2_id!),
+      supabase
+        .from("match_detail")
+        .select("*")
+        .or(`team1_player1_id.eq.${team.player1_id},team1_player2_id.eq.${team.player1_id},team2_player1_id.eq.${team.player1_id},team2_player2_id.eq.${team.player1_id}`),
+    ]);
 
-    const rows = (data ?? []) as TeamOpponentStat[];
+    const rows = (oppRes.data ?? []) as TeamOpponentStat[];
     const best = rows.length
       ? rows.reduce((a, b) => ((b.wins_vs ?? 0) > (a.wins_vs ?? 0) ? b : a))
       : null;
@@ -107,14 +178,107 @@ function TeamsPage() {
       : null;
 
     setOppData({ best, worst });
+
+    const allMatches = (matchRes.data ?? []) as MatchDetailRow[];
+    const bw = computeBestWorst(allMatches, team.player1_id!, team.player2_id!);
+    setBestWorst(bw);
+
     setLoading(false);
   };
+
+  const teamsByAmp = [...teams].sort((a, b) => (b.avg_match_points ?? 0) - (a.avg_match_points ?? 0));
+  const teamsByWin = [...teams].sort((a, b) => (b.win_pct ?? 0) - (a.win_pct ?? 0));
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />
       <div className="mx-auto max-w-5xl px-4 py-8">
         <h1 className="text-2xl font-bold mb-6">Teams</h1>
+
+        {/* Rankings Section */}
+        <section className="mb-8">
+          <h2 className="text-xl font-bold mb-4">Rankings</h2>
+          <Tabs defaultValue="amp">
+            <TabsList className="mb-4">
+              <TabsTrigger value="amp" className="gap-1.5"><Trophy className="w-4 h-4" /> AMP</TabsTrigger>
+              <TabsTrigger value="winpct" className="gap-1.5"><Percent className="w-4 h-4" /> Win %</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="amp">
+              <div className="rounded-lg border overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-12">#</TableHead>
+                      <TableHead>Team</TableHead>
+                      <TableHead className="text-right">Matches</TableHead>
+                      <TableHead className="text-right">AMP</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {teamsByAmp.map((t, i) => (
+                      <TableRow key={`${t.player1_id}-${t.player2_id}`}>
+                        <TableCell className="font-medium">{i + 1}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <div className="flex -space-x-2">
+                              <PlayerAvatar url={avatarMap[t.player1_id ?? ""] ?? null} name={t.player1_name} size={36} />
+                              <PlayerAvatar url={avatarMap[t.player2_id ?? ""] ?? null} name={t.player2_name} size={36} />
+                            </div>
+                            <span className="font-medium text-sm">{t.player1_name} & {t.player2_name}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right">{t.matches_played ?? 0}</TableCell>
+                        <TableCell className="text-right font-semibold">
+                          {t.avg_match_points != null ? Number(t.avg_match_points).toFixed(1) : "—"}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="winpct">
+              <div className="rounded-lg border overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-12">#</TableHead>
+                      <TableHead>Team</TableHead>
+                      <TableHead className="text-right">Played</TableHead>
+                      <TableHead className="text-right">Won</TableHead>
+                      <TableHead className="text-right">Win %</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {teamsByWin.map((t, i) => (
+                      <TableRow key={`${t.player1_id}-${t.player2_id}`}>
+                        <TableCell className="font-medium">{i + 1}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <div className="flex -space-x-2">
+                              <PlayerAvatar url={avatarMap[t.player1_id ?? ""] ?? null} name={t.player1_name} size={36} />
+                              <PlayerAvatar url={avatarMap[t.player2_id ?? ""] ?? null} name={t.player2_name} size={36} />
+                            </div>
+                            <span className="font-medium text-sm">{t.player1_name} & {t.player2_name}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right">{t.matches_played ?? 0}</TableCell>
+                        <TableCell className="text-right">{t.matches_won ?? 0}</TableCell>
+                        <TableCell className="text-right font-semibold">
+                          {t.win_pct != null ? `${Number(t.win_pct).toFixed(0)}%` : "—"}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </section>
+
+        {/* Team Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {teams.map((t) => {
             const key = `${t.player1_id}-${t.player2_id}`;
@@ -178,13 +342,33 @@ function TeamsPage() {
                   <div className="grid grid-cols-2 gap-3">
                     <div className="rounded-lg border p-3">
                       <p className="text-xs text-muted-foreground mb-1">Best Game</p>
-                      <p className="text-lg font-bold">+{selected.best_margin ?? 0}</p>
-                      <p className="text-xs text-muted-foreground">score margin</p>
+                      {bestWorst?.best ? (
+                        <>
+                          <p className="text-lg font-bold">
+                            {bestWorst.best.theirScore} – {bestWorst.best.oppScore}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            vs {bestWorst.best.oppNames}
+                          </p>
+                        </>
+                      ) : (
+                        <p className="text-xs text-muted-foreground">No matches played yet</p>
+                      )}
                     </div>
                     <div className="rounded-lg border p-3">
                       <p className="text-xs text-muted-foreground mb-1">Worst Game</p>
-                      <p className="text-lg font-bold">{selected.worst_margin ?? 0}</p>
-                      <p className="text-xs text-muted-foreground">score margin</p>
+                      {bestWorst?.worst ? (
+                        <>
+                          <p className="text-lg font-bold">
+                            {bestWorst.worst.theirScore} – {bestWorst.worst.oppScore}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            vs {bestWorst.worst.oppNames}
+                          </p>
+                        </>
+                      ) : (
+                        <p className="text-xs text-muted-foreground">No matches played yet</p>
+                      )}
                     </div>
                   </div>
 
