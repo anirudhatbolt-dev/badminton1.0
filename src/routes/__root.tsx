@@ -25,6 +25,7 @@ export const Route = createRootRoute({
       { name: "twitter:description", content: "Badminton score tracker for Giga Chads" },
     ],
     links: [
+      { rel: "icon", href: "/favicon.png" },
       {
         rel: "stylesheet",
         href: appCss,
