@@ -161,16 +161,16 @@ function PlayersPage() {
     const bw = bwRes.data as BestWorstMatch | null;
 
     const bestPartner = partners.length
-      ? partners.reduce((a, b) => ((b.wins_together ?? 0) > (a.wins_together ?? 0) ? b : a))
+      ? partners.reduce((a, b) => ((b.win_pct_together ?? 0) > (a.win_pct_together ?? 0) ? b : a))
       : null;
     const worstPartner = partners.length
-      ? partners.reduce((a, b) => ((b.losses_together ?? 0) > (a.losses_together ?? 0) ? b : a))
+      ? partners.reduce((a, b) => ((b.win_pct_together ?? 0) < (a.win_pct_together ?? 0) ? b : a))
       : null;
     const bestOpponent = opponents.length
-      ? opponents.reduce((a, b) => ((b.wins_vs ?? 0) > (a.wins_vs ?? 0) ? b : a))
+      ? opponents.reduce((a, b) => ((b.win_pct_vs ?? 0) > (a.win_pct_vs ?? 0) ? b : a))
       : null;
     const worstOpponent = opponents.length
-      ? opponents.reduce((a, b) => ((b.losses_vs ?? 0) > (a.losses_vs ?? 0) ? b : a))
+      ? opponents.reduce((a, b) => ((b.win_pct_vs ?? 0) < (a.win_pct_vs ?? 0) ? b : a))
       : null;
 
     let bestMatchDetail: MatchDetail | null = null;
