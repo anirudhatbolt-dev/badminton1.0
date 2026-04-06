@@ -98,6 +98,10 @@ function MatchesPage() {
   const clampScore = (v: number) => Math.max(0, Math.min(30, v));
 
   const handleSubmit = async () => {
+    if (!session) {
+      toast.error("Sign in or create account to add matches");
+      return;
+    }
     if (!t1p1 || !t1p2 || !t2p1 || !t2p2) {
       toast.error("Select all 4 players");
       return;
@@ -116,6 +120,7 @@ function MatchesPage() {
           team1_score: score1,
           team2_score: score2,
           winning_team,
+          created_by: session.user.email ?? null,
         })
         .select("id")
         .single();
