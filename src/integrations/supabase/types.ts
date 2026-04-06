@@ -151,6 +151,7 @@ export type Database = {
       matches: {
         Row: {
           created_at: string
+          created_by: string | null
           id: string
           played_at: string
           status: Database["public"]["Enums"]["match_status"]
@@ -160,6 +161,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          created_by?: string | null
           id?: string
           played_at?: string
           status?: Database["public"]["Enums"]["match_status"]
@@ -169,6 +171,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          created_by?: string | null
           id?: string
           played_at?: string
           status?: Database["public"]["Enums"]["match_status"]
