@@ -44,6 +44,7 @@ type MatchDetail = {
 };
 
 function MatchesPage() {
+  const { session } = useAuth();
   const [players, setPlayers] = useState<Player[]>([]);
   const [matches, setMatches] = useState<MatchDetail[]>([]);
   const [t1p1, setT1p1] = useState("");
