@@ -53,13 +53,15 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   return (
-    <DemoProvider>
-      <RoleProvider>
-        <ErrorBoundary>
-          <Outlet />
-        </ErrorBoundary>
-        {/* <Toaster position="bottom-right" richColors /> */}
-      </RoleProvider>
-    </DemoProvider>
+    <AuthProvider>
+      <DemoProvider>
+        <RoleProvider>
+          <ErrorBoundary>
+            <Outlet />
+          </ErrorBoundary>
+          <Toaster position="bottom-right" richColors />
+        </RoleProvider>
+      </DemoProvider>
+    </AuthProvider>
   );
 }

@@ -163,6 +163,10 @@ function MatchesPage() {
   };
 
   const handleEditSave = async () => {
+    if (!session) {
+      toast.error("Sign in or create account to add matches");
+      return;
+    }
     if (!editMatch?.match_id) return;
     if (!editT1p1 || !editT1p2 || !editT2p1 || !editT2p2) {
       toast.error("Select all 4 players");
