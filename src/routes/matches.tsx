@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { Navbar } from "@/components/Navbar";
 import { PlayerAvatar } from "@/components/PlayerAvatar";
 import { Button } from "@/components/ui/button";
@@ -43,6 +44,7 @@ type MatchDetail = {
 };
 
 function MatchesPage() {
+  const { session } = useAuth();
   const [players, setPlayers] = useState<Player[]>([]);
   const [matches, setMatches] = useState<MatchDetail[]>([]);
   const [t1p1, setT1p1] = useState("");
@@ -96,6 +98,10 @@ function MatchesPage() {
   const clampScore = (v: number) => Math.max(0, Math.min(30, v));
 
   const handleSubmit = async () => {
+    if (!session) {
+      toast.error("Sign in or create account to add matches");
+      return;
+    }
     if (!t1p1 || !t1p2 || !t2p1 || !t2p2) {
       toast.error("Select all 4 players");
       return;
@@ -114,6 +120,7 @@ function MatchesPage() {
           team1_score: score1,
           team2_score: score2,
           winning_team,
+          created_by: session.user.email ?? null,
         })
         .select("id")
         .single();
@@ -156,6 +163,10 @@ function MatchesPage() {
   };
 
   const handleEditSave = async () => {
+    if (!session) {
+      toast.error("Sign in or create account to add matches");
+      return;
+    }
     if (!editMatch?.match_id) return;
     if (!editT1p1 || !editT1p2 || !editT2p1 || !editT2p2) {
       toast.error("Select all 4 players");
