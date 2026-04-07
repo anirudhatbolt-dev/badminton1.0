@@ -1,62 +1,42 @@
 
 
-## Plan: Email Auth + Stats Page
+## Plan: Best/Worst Match Cards + Auth Fix + Avatar Dropdown + Rename
 
-### Overview
-Add Supabase email/password authentication with login page, navbar integration, and match creation/edit guards. Add a `/stats` page showing top/bottom players and teams.
+### Task 1: Best Match / Worst Match stat cards
 
----
+**File: `src/routes/stats.tsx`**
 
-### Change 1: Auth Context (`src/contexts/AuthContext.tsx` — new)
-- Create `AuthProvider` + `useAuth` hook
-- Track `session` and `user` via `onAuthStateChange` (set up before `getSession()`)
-- Provide `{ session, user, loading }` to the app
+- Add a `MatchDetail` type with fields from `match_detail` view (match_id, team1_score, team2_score, team1_player1_name, team1_player2_name, team2_player1_name, team2_player2_name, status)
+- In `useEffect`, fetch from `match_detail` where `status = 'completed'`, select relevant columns
+- Compute best match (highest `team1_score + team2_score`) and worst match (lowest sum)
+- Add a `MatchCard` component matching existing card style: label at top, score line "21 – 19", team names below "Name & Name vs Name & Name"
+- Render two new cards at the bottom of the grid. If no completed matches, show "No matches yet" inside the card.
 
-### Change 2: Root layout (`src/routes/__root.tsx`)
-- Wrap app with `AuthProvider` (inside existing providers)
-- Uncomment `<Toaster />` from sonner
+### Task 2: Auth redirect URL fix
 
-### Change 3: Login page (`src/routes/login.tsx` — new)
-- Single page with email + password fields
-- Two buttons: "Sign In" and "Sign Up"
-- Sign Up calls `supabase.auth.signUp({ email, password })`, shows confirmation message
-- Sign In calls `supabase.auth.signInWithPassword({ email, password })`, redirects to `/matches`
-- Error handling for wrong credentials, unconfirmed email
-- Minimal styling matching app design
+**File: `src/routes/login.tsx`**
 
-### Change 4: Navbar update (`src/components/Navbar.tsx`)
-- Add "Stats" to `NAV_LINKS`: `{ label: "Stats", to: "/stats" }`
-- Desktop: after nav links, show "Login" button (green, `bg-primary text-primary-foreground`) if not signed in; show email + "Sign Out" button if signed in
-- Mobile sidebar: show Login/email+SignOut below nav items
-- Use `useAuth()` hook for session state
+- In `handleSignUp`, add `options: { emailRedirectTo: window.location.origin }` to the `signUp` call
 
-### Change 5: Match guards (`src/routes/matches.tsx`)
-- Import `useAuth` hook
-- In `handleSubmit`: check session. If none, show toast "Sign in or create account to add matches" and return. If session exists, add `created_by: session.user.email` to the matches INSERT.
-- In `handleEditSave`: same session check with toast guard
+### Task 3: Avatar dropdown replacing Login button
 
-### Change 6: Stats page (`src/routes/stats.tsx` — new)
-- Fetch `player_stats` where `matches_played > 0` and `team_stats` where `matches_played > 0`
-- Compute 6 stats:
-  - Best/Worst Player by AMP (highest/lowest `avg_match_points`)
-  - Best/Worst Player by Win % (highest/lowest `win_pct`)
-  - Best/Worst Team by AMP (highest/lowest `avg_match_points`)
-- Render 6 non-clickable cards in 2-col grid (1-col mobile)
-- Player cards: circular avatar + name + stat value
-- Team cards: two avatars side by side + "Name & Name" + AMP value
-- For team cards, fetch avatar_url from `players` table using `player1_id` and `player2_id`
-- Include `<Navbar />` at top
+**File: `src/components/Navbar.tsx`**
+
+- Import `User` icon from lucide-react and `DropdownMenu` components from `@/components/ui/dropdown-menu`
+- When signed in (desktop): replace email text + Sign Out button with a circular avatar trigger (User icon in a rounded-full button) that opens a dropdown with one item: "Sign Out" (calls `signOut()` then navigates to `/`)
+- When signed in (mobile): same pattern — avatar icon + Sign Out dropdown item instead of raw text
+
+### Task 4: Rename Gigaminton to Chadminton
+
+**File: `src/components/Navbar.tsx`**
+
+- Change the logo text from "Gigaminton" to "Chadminton" (only occurrence found in codebase — root already says Chadminton)
 
 ### Files touched
+
 | File | Action |
 |------|--------|
-| `src/contexts/AuthContext.tsx` | Create |
-| `src/routes/__root.tsx` | Modify (add AuthProvider, uncomment Toaster) |
-| `src/routes/login.tsx` | Create |
-| `src/components/Navbar.tsx` | Modify (add Stats link, Login/SignOut) |
-| `src/routes/matches.tsx` | Modify (add auth guards) |
-| `src/routes/stats.tsx` | Create |
-
-### No database migrations needed
-The `created_by` column already exists on the `matches` table as a nullable text field.
+| `src/routes/stats.tsx` | Add match_detail fetch + MatchCard + 2 new cards |
+| `src/routes/login.tsx` | Add emailRedirectTo option |
+| `src/components/Navbar.tsx` | Avatar dropdown, rename to Chadminton |
 
