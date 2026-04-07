@@ -128,6 +128,8 @@ function PlayersPage() {
   const [modalData, setModalData] = useState<ModalData | null>(null);
   const [loading, setLoading] = useState(false);
   const [avatarMap, setAvatarMap] = useState<Record<string, string | null>>({});
+  const [topAmpId, setTopAmpId] = useState<string | null>(null);
+  const [topWinPctId, setTopWinPctId] = useState<string | null>(null);
 
   useEffect(() => {
     supabase
@@ -140,6 +142,25 @@ function PlayersPage() {
           const map: Record<string, string | null> = {};
           data.forEach((p) => (map[p.id] = p.avatar_url));
           setAvatarMap(map);
+        }
+      });
+
+    supabase
+      .from("player_stats")
+      .select("player_id, avg_match_points, win_pct, matches_played")
+      .then(({ data }) => {
+        if (data) {
+          const active = (data as PlayerStatRow[]).filter((s) => (s.matches_played ?? 0) > 0);
+          if (active.length) {
+            const bestAmp = active.reduce((a, b) =>
+              (b.avg_match_points ?? 0) > (a.avg_match_points ?? 0) ? b : a
+            );
+            const bestWin = active.reduce((a, b) =>
+              (b.win_pct ?? 0) > (a.win_pct ?? 0) ? b : a
+            );
+            setTopAmpId(bestAmp.player_id ?? null);
+            setTopWinPctId(bestWin.player_id ?? null);
+          }
         }
       });
   }, []);
