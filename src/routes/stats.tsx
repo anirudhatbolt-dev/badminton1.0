@@ -27,10 +27,23 @@ type TeamStat = {
   avg_match_points: number | null;
 };
 
+type MatchDetail = {
+  match_id: string | null;
+  team1_score: number | null;
+  team2_score: number | null;
+  team1_player1_name: string | null;
+  team1_player2_name: string | null;
+  team2_player1_name: string | null;
+  team2_player2_name: string | null;
+  status: string | null;
+};
+
 function StatsPage() {
   const [playerStats, setPlayerStats] = useState<PlayerStat[]>([]);
   const [teamStats, setTeamStats] = useState<TeamStat[]>([]);
   const [avatarMap, setAvatarMap] = useState<Record<string, string | null>>({});
+  const [bestMatch, setBestMatch] = useState<MatchDetail | null>(null);
+  const [worstMatch, setWorstMatch] = useState<MatchDetail | null>(null);
 
   useEffect(() => {
     supabase
@@ -49,7 +62,6 @@ function StatsPage() {
         if (data) {
           const teams = data as TeamStat[];
           setTeamStats(teams);
-          // Fetch avatars for team players
           const ids = new Set<string>();
           teams.forEach((t) => {
             if (t.player1_id) ids.add(t.player1_id);
@@ -68,6 +80,23 @@ function StatsPage() {
                 }
               });
           }
+        }
+      });
+
+    supabase
+      .from("match_detail")
+      .select("match_id, team1_score, team2_score, team1_player1_name, team1_player2_name, team2_player1_name, team2_player2_name, status")
+      .eq("status", "completed")
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          const matches = data as MatchDetail[];
+          const sorted = [...matches].sort(
+            (a, b) =>
+              ((b.team1_score ?? 0) + (b.team2_score ?? 0)) -
+              ((a.team1_score ?? 0) + (a.team2_score ?? 0))
+          );
+          setBestMatch(sorted[0]);
+          setWorstMatch(sorted[sorted.length - 1]);
         }
       });
   }, []);
@@ -134,6 +163,8 @@ function StatsPage() {
           {worstTeamAmp && (
             <TeamCard label="Worst Team — AMP" team={worstTeamAmp} avatarMap={avatarMap} />
           )}
+          <MatchCard label="Best Match" match={bestMatch} />
+          <MatchCard label="Worst Match" match={worstMatch} />
         </div>
       </div>
     </div>
@@ -177,6 +208,26 @@ function TeamCard({
       <p className="text-sm text-muted-foreground">
         AMP: {Number(team.avg_match_points ?? 0).toFixed(1)}
       </p>
+    </div>
+  );
+}
+
+function MatchCard({ label, match }: { label: string; match: MatchDetail | null }) {
+  return (
+    <div className="rounded-xl border bg-card p-5 space-y-3">
+      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</p>
+      {match ? (
+        <>
+          <p className="text-2xl font-bold">
+            {match.team1_score} – {match.team2_score}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            {match.team1_player1_name} & {match.team1_player2_name} vs {match.team2_player1_name} & {match.team2_player2_name}
+          </p>
+        </>
+      ) : (
+        <p className="text-sm text-muted-foreground">No matches yet</p>
+      )}
     </div>
   );
 }
