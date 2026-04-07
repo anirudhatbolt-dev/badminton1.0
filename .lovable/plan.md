@@ -1,42 +1,18 @@
 
+## Plan: Add Rank Tags to Player Cards
 
-## Plan: Best/Worst Match Cards + Auth Fix + Avatar Dropdown + Rename
+### What changes
+**File: `src/routes/players.tsx`**
 
-### Task 1: Best Match / Worst Match stat cards
+- Add a `playerStats` state (`PlayerStatRow[]`) and fetch all `player_stats` once on page load (alongside the existing players fetch)
+- From the fetched stats (filtered to `matches_played > 0`), compute:
+  - `topAmpId`: player_id with highest `avg_match_points`
+  - `topWinPctId`: player_id with highest `win_pct`
+- In the player card grid, after the player name `<span>`, conditionally render pill badges:
+  - `#1 AMP` if player.id matches topAmpId
+  - `#1 Win %` if player.id matches topWinPctId
+- Badge style: `text-xs px-2 py-0.5 rounded-full border border-border bg-muted text-muted-foreground font-medium` — subtle pill annotation
+- Badges shown in a flex row with `gap-1` below the name
 
-**File: `src/routes/stats.tsx`**
-
-- Add a `MatchDetail` type with fields from `match_detail` view (match_id, team1_score, team2_score, team1_player1_name, team1_player2_name, team2_player1_name, team2_player2_name, status)
-- In `useEffect`, fetch from `match_detail` where `status = 'completed'`, select relevant columns
-- Compute best match (highest `team1_score + team2_score`) and worst match (lowest sum)
-- Add a `MatchCard` component matching existing card style: label at top, score line "21 – 19", team names below "Name & Name vs Name & Name"
-- Render two new cards at the bottom of the grid. If no completed matches, show "No matches yet" inside the card.
-
-### Task 2: Auth redirect URL fix
-
-**File: `src/routes/login.tsx`**
-
-- In `handleSignUp`, add `options: { emailRedirectTo: window.location.origin }` to the `signUp` call
-
-### Task 3: Avatar dropdown replacing Login button
-
-**File: `src/components/Navbar.tsx`**
-
-- Import `User` icon from lucide-react and `DropdownMenu` components from `@/components/ui/dropdown-menu`
-- When signed in (desktop): replace email text + Sign Out button with a circular avatar trigger (User icon in a rounded-full button) that opens a dropdown with one item: "Sign Out" (calls `signOut()` then navigates to `/`)
-- When signed in (mobile): same pattern — avatar icon + Sign Out dropdown item instead of raw text
-
-### Task 4: Rename Gigaminton to Chadminton
-
-**File: `src/components/Navbar.tsx`**
-
-- Change the logo text from "Gigaminton" to "Chadminton" (only occurrence found in codebase — root already says Chadminton)
-
-### Files touched
-
-| File | Action |
-|------|--------|
-| `src/routes/stats.tsx` | Add match_detail fetch + MatchCard + 2 new cards |
-| `src/routes/login.tsx` | Add emailRedirectTo option |
-| `src/components/Navbar.tsx` | Avatar dropdown, rename to Chadminton |
-
+### No other files touched
+Only `src/routes/players.tsx` is modified. No DB changes needed — `player_stats` view already exists and is already typed.
