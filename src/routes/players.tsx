@@ -236,6 +236,16 @@ function PlayersPage() {
             >
               <PlayerAvatar url={p.avatar_url} name={p.name} size={96} />
               <span className="font-medium text-base text-center">{p.name}</span>
+              {(topAmpId === p.id || topWinPctId === p.id) && (
+                <div className="flex items-center gap-1 flex-wrap justify-center">
+                  {topAmpId === p.id && (
+                    <span className="text-xs px-2 py-0.5 rounded-full border border-border bg-muted text-muted-foreground font-medium">#1 AMP</span>
+                  )}
+                  {topWinPctId === p.id && (
+                    <span className="text-xs px-2 py-0.5 rounded-full border border-border bg-muted text-muted-foreground font-medium">#1 Win %</span>
+                  )}
+                </div>
+              )}
             </button>
           ))}
         </div>
