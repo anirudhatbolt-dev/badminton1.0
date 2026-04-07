@@ -1,9 +1,15 @@
 import { useState } from "react";
-import { Link } from "@tanstack/react-router";
-import { Menu, X, LogOut } from "lucide-react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { Menu, X, User } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 
 const NAV_LINKS = [
@@ -17,17 +23,19 @@ const NAV_LINKS = [
 export function Navbar() {
   const [open, setOpen] = useState(false);
   const { user, loading } = useAuth();
+  const navigate = useNavigate();
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     toast.success("Signed out");
+    navigate({ to: "/" });
   };
 
   return (
     <nav className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
         <Link to="/" className="text-xl font-extrabold tracking-tight">
-          Gigaminton
+          Chadminton
         </Link>
 
         <div className="hidden md:flex items-center gap-6">
@@ -46,15 +54,18 @@ export function Navbar() {
           {!loading && (
             <>
               {user ? (
-                <div className="flex items-center gap-3 ml-2">
-                  <span className="text-xs text-muted-foreground truncate max-w-[160px]">
-                    {user.email}
-                  </span>
-                  <Button variant="ghost" size="sm" onClick={handleSignOut} className="gap-1.5">
-                    <LogOut className="w-3.5 h-3.5" />
-                    Sign Out
-                  </Button>
-                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="ml-2 rounded-full w-8 h-8">
+                      <User className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={handleSignOut}>
+                      Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               ) : (
                 <Link to="/login">
                   <Button size="sm" className="ml-2">Login</Button>
@@ -92,13 +103,18 @@ export function Navbar() {
             {!loading && (
               <div className="pt-4 border-t mt-2">
                 {user ? (
-                  <div className="space-y-3">
-                    <p className="text-sm text-muted-foreground truncate">{user.email}</p>
-                    <Button variant="outline" size="sm" onClick={() => { handleSignOut(); setOpen(false); }} className="gap-1.5">
-                      <LogOut className="w-3.5 h-3.5" />
-                      Sign Out
-                    </Button>
-                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="rounded-full w-8 h-8">
+                        <User className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start">
+                      <DropdownMenuItem onClick={() => { handleSignOut(); setOpen(false); }}>
+                        Sign Out
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 ) : (
                   <Link to="/login" onClick={() => setOpen(false)}>
                     <Button size="sm">Login</Button>
