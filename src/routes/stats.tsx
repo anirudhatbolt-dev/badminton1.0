@@ -24,7 +24,9 @@ type TeamStat = {
   player2_id: string | null;
   player2_name: string | null;
   matches_played: number | null;
+  matches_won: number | null;
   avg_match_points: number | null;
+  win_pct: number | null;
 };
 
 type MatchDetail = {
@@ -130,6 +132,12 @@ function StatsPage() {
   const worstTeamAmp = [...teamStats].sort(
     (a, b) => (a.avg_match_points ?? 0) - (b.avg_match_points ?? 0)
   )[0];
+  const bestTeamWin = [...teamStats].sort(
+    (a, b) => (b.win_pct ?? 0) - (a.win_pct ?? 0)
+  )[0];
+  const worstTeamWin = [...teamStats].sort(
+    (a, b) => (a.win_pct ?? 0) - (b.win_pct ?? 0)
+  )[0];
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -162,6 +170,12 @@ function StatsPage() {
           )}
           {worstTeamAmp && (
             <TeamCard label="Worst Team — AMP" team={worstTeamAmp} avatarMap={avatarMap} />
+          )}
+          {bestTeamWin && (
+            <TeamWinCard label="Best Team — Win %" team={bestTeamWin} avatarMap={avatarMap} />
+          )}
+          {worstTeamWin && (
+            <TeamWinCard label="Worst Team — Win %" team={worstTeamWin} avatarMap={avatarMap} />
           )}
           <MatchCard label="Best Match" match={bestMatch} />
           <MatchCard label="Worst Match" match={worstMatch} />
@@ -207,6 +221,34 @@ function TeamCard({
       </div>
       <p className="text-sm text-muted-foreground">
         AMP: {Number(team.avg_match_points ?? 0).toFixed(1)}
+      </p>
+    </div>
+  );
+}
+
+function TeamWinCard({
+  label,
+  team,
+  avatarMap,
+}: {
+  label: string;
+  team: TeamStat;
+  avatarMap: Record<string, string | null>;
+}) {
+  return (
+    <div className="rounded-xl border bg-card p-5 space-y-3">
+      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</p>
+      <div className="flex items-center gap-3">
+        <div className="flex -space-x-2">
+          <PlayerAvatar url={avatarMap[team.player1_id ?? ""] ?? null} name={team.player1_name} size={40} />
+          <PlayerAvatar url={avatarMap[team.player2_id ?? ""] ?? null} name={team.player2_name} size={40} />
+        </div>
+        <span className="text-lg font-bold">
+          {team.player1_name} & {team.player2_name}
+        </span>
+      </div>
+      <p className="text-sm text-muted-foreground">
+        {team.matches_played} played · {team.matches_won} won · {Number(team.win_pct ?? 0).toFixed(0)}%
       </p>
     </div>
   );
