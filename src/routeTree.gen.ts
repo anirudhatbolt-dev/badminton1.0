@@ -11,9 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TeamsRouteImport } from './routes/teams'
 import { Route as StatsRouteImport } from './routes/stats'
+import { Route as ReportRouteImport } from './routes/report'
 import { Route as PlayersRouteImport } from './routes/players'
 import { Route as MatchesRouteImport } from './routes/matches'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as FixtureRouteImport } from './routes/fixture'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
@@ -39,6 +41,11 @@ const StatsRoute = StatsRouteImport.update({
   path: '/stats',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ReportRoute = ReportRouteImport.update({
+  id: '/report',
+  path: '/report',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PlayersRoute = PlayersRouteImport.update({
   id: '/players',
   path: '/players',
@@ -52,6 +59,11 @@ const MatchesRoute = MatchesRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FixtureRoute = FixtureRouteImport.update({
+  id: '/fixture',
+  path: '/fixture',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppRoute = AppRouteImport.update({
@@ -128,9 +140,11 @@ const AppAiInsightsRoute = AppAiInsightsRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/fixture': typeof FixtureRoute
   '/login': typeof LoginRoute
   '/matches': typeof MatchesRoute
   '/players': typeof PlayersRoute
+  '/report': typeof ReportRoute
   '/stats': typeof StatsRoute
   '/teams': typeof TeamsRoute
   '/app/ai-insights': typeof AppAiInsightsRoute
@@ -148,9 +162,11 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/fixture': typeof FixtureRoute
   '/login': typeof LoginRoute
   '/matches': typeof MatchesRoute
   '/players': typeof PlayersRoute
+  '/report': typeof ReportRoute
   '/stats': typeof StatsRoute
   '/teams': typeof TeamsRoute
   '/app/ai-insights': typeof AppAiInsightsRoute
@@ -170,9 +186,11 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/fixture': typeof FixtureRoute
   '/login': typeof LoginRoute
   '/matches': typeof MatchesRoute
   '/players': typeof PlayersRoute
+  '/report': typeof ReportRoute
   '/stats': typeof StatsRoute
   '/teams': typeof TeamsRoute
   '/app/ai-insights': typeof AppAiInsightsRoute
@@ -193,9 +211,11 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/app'
+    | '/fixture'
     | '/login'
     | '/matches'
     | '/players'
+    | '/report'
     | '/stats'
     | '/teams'
     | '/app/ai-insights'
@@ -213,9 +233,11 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/fixture'
     | '/login'
     | '/matches'
     | '/players'
+    | '/report'
     | '/stats'
     | '/teams'
     | '/app/ai-insights'
@@ -234,9 +256,11 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/app'
+    | '/fixture'
     | '/login'
     | '/matches'
     | '/players'
+    | '/report'
     | '/stats'
     | '/teams'
     | '/app/ai-insights'
@@ -256,9 +280,11 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
+  FixtureRoute: typeof FixtureRoute
   LoginRoute: typeof LoginRoute
   MatchesRoute: typeof MatchesRoute
   PlayersRoute: typeof PlayersRoute
+  ReportRoute: typeof ReportRoute
   StatsRoute: typeof StatsRoute
   TeamsRoute: typeof TeamsRoute
 }
@@ -277,6 +303,13 @@ declare module '@tanstack/react-router' {
       path: '/stats'
       fullPath: '/stats'
       preLoaderRoute: typeof StatsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/report': {
+      id: '/report'
+      path: '/report'
+      fullPath: '/report'
+      preLoaderRoute: typeof ReportRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/players': {
@@ -298,6 +331,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fixture': {
+      id: '/fixture'
+      path: '/fixture'
+      fullPath: '/fixture'
+      preLoaderRoute: typeof FixtureRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app': {
@@ -436,9 +476,11 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
+  FixtureRoute: FixtureRoute,
   LoginRoute: LoginRoute,
   MatchesRoute: MatchesRoute,
   PlayersRoute: PlayersRoute,
+  ReportRoute: ReportRoute,
   StatsRoute: StatsRoute,
   TeamsRoute: TeamsRoute,
 }
