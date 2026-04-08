@@ -154,6 +154,7 @@ export type Database = {
           created_by: string | null
           id: string
           played_at: string
+          session_id: string | null
           status: Database["public"]["Enums"]["match_status"]
           team1_score: number | null
           team2_score: number | null
@@ -164,6 +165,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           played_at?: string
+          session_id?: string | null
           status?: Database["public"]["Enums"]["match_status"]
           team1_score?: number | null
           team2_score?: number | null
@@ -174,12 +176,21 @@ export type Database = {
           created_by?: string | null
           id?: string
           played_at?: string
+          session_id?: string | null
           status?: Database["public"]["Enums"]["match_status"]
           team1_score?: number | null
           team2_score?: number | null
           winning_team?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "matches_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       players: {
         Row: {
@@ -202,6 +213,691 @@ export type Database = {
           description?: string | null
           id?: string
           name?: string
+        }
+        Relationships: []
+      }
+      session_events: {
+        Row: {
+          condition_applied: string | null
+          condition_label: string | null
+          created_at: string
+          event_type: string
+          id: string
+          match_id: string | null
+          player_in_id: string | null
+          player_out_id: string | null
+          sequence_number: number
+          session_id: string
+          team1_player1_id: string | null
+          team1_player2_id: string | null
+          team2_player1_id: string | null
+          team2_player2_id: string | null
+        }
+        Insert: {
+          condition_applied?: string | null
+          condition_label?: string | null
+          created_at?: string
+          event_type: string
+          id?: string
+          match_id?: string | null
+          player_in_id?: string | null
+          player_out_id?: string | null
+          sequence_number: number
+          session_id: string
+          team1_player1_id?: string | null
+          team1_player2_id?: string | null
+          team2_player1_id?: string | null
+          team2_player2_id?: string | null
+        }
+        Update: {
+          condition_applied?: string | null
+          condition_label?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          match_id?: string | null
+          player_in_id?: string | null
+          player_out_id?: string | null
+          sequence_number?: number
+          session_id?: string
+          team1_player1_id?: string | null
+          team1_player2_id?: string | null
+          team2_player1_id?: string | null
+          team2_player2_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_events_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "match_detail"
+            referencedColumns: ["match_id"]
+          },
+          {
+            foreignKeyName: "session_events_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_events_player_in_id_fkey"
+            columns: ["player_in_id"]
+            isOneToOne: false
+            referencedRelation: "partner_filtered_ranking"
+            referencedColumns: ["partner_id"]
+          },
+          {
+            foreignKeyName: "session_events_player_in_id_fkey"
+            columns: ["player_in_id"]
+            isOneToOne: false
+            referencedRelation: "partner_filtered_ranking"
+            referencedColumns: ["player_id"]
+          },
+          {
+            foreignKeyName: "session_events_player_in_id_fkey"
+            columns: ["player_in_id"]
+            isOneToOne: false
+            referencedRelation: "player_opponent_stats"
+            referencedColumns: ["opponent_id"]
+          },
+          {
+            foreignKeyName: "session_events_player_in_id_fkey"
+            columns: ["player_in_id"]
+            isOneToOne: false
+            referencedRelation: "player_opponent_stats"
+            referencedColumns: ["player_id"]
+          },
+          {
+            foreignKeyName: "session_events_player_in_id_fkey"
+            columns: ["player_in_id"]
+            isOneToOne: false
+            referencedRelation: "player_partner_stats"
+            referencedColumns: ["partner_id"]
+          },
+          {
+            foreignKeyName: "session_events_player_in_id_fkey"
+            columns: ["player_in_id"]
+            isOneToOne: false
+            referencedRelation: "player_partner_stats"
+            referencedColumns: ["player_id"]
+          },
+          {
+            foreignKeyName: "session_events_player_in_id_fkey"
+            columns: ["player_in_id"]
+            isOneToOne: false
+            referencedRelation: "player_stats"
+            referencedColumns: ["player_id"]
+          },
+          {
+            foreignKeyName: "session_events_player_in_id_fkey"
+            columns: ["player_in_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_events_player_in_id_fkey"
+            columns: ["player_in_id"]
+            isOneToOne: false
+            referencedRelation: "team_opponent_stats"
+            referencedColumns: ["opp_player1_id"]
+          },
+          {
+            foreignKeyName: "session_events_player_in_id_fkey"
+            columns: ["player_in_id"]
+            isOneToOne: false
+            referencedRelation: "team_opponent_stats"
+            referencedColumns: ["opp_player2_id"]
+          },
+          {
+            foreignKeyName: "session_events_player_in_id_fkey"
+            columns: ["player_in_id"]
+            isOneToOne: false
+            referencedRelation: "team_opponent_stats"
+            referencedColumns: ["team_player1_id"]
+          },
+          {
+            foreignKeyName: "session_events_player_in_id_fkey"
+            columns: ["player_in_id"]
+            isOneToOne: false
+            referencedRelation: "team_opponent_stats"
+            referencedColumns: ["team_player2_id"]
+          },
+          {
+            foreignKeyName: "session_events_player_in_id_fkey"
+            columns: ["player_in_id"]
+            isOneToOne: false
+            referencedRelation: "team_stats"
+            referencedColumns: ["player1_id"]
+          },
+          {
+            foreignKeyName: "session_events_player_in_id_fkey"
+            columns: ["player_in_id"]
+            isOneToOne: false
+            referencedRelation: "team_stats"
+            referencedColumns: ["player2_id"]
+          },
+          {
+            foreignKeyName: "session_events_player_out_id_fkey"
+            columns: ["player_out_id"]
+            isOneToOne: false
+            referencedRelation: "partner_filtered_ranking"
+            referencedColumns: ["partner_id"]
+          },
+          {
+            foreignKeyName: "session_events_player_out_id_fkey"
+            columns: ["player_out_id"]
+            isOneToOne: false
+            referencedRelation: "partner_filtered_ranking"
+            referencedColumns: ["player_id"]
+          },
+          {
+            foreignKeyName: "session_events_player_out_id_fkey"
+            columns: ["player_out_id"]
+            isOneToOne: false
+            referencedRelation: "player_opponent_stats"
+            referencedColumns: ["opponent_id"]
+          },
+          {
+            foreignKeyName: "session_events_player_out_id_fkey"
+            columns: ["player_out_id"]
+            isOneToOne: false
+            referencedRelation: "player_opponent_stats"
+            referencedColumns: ["player_id"]
+          },
+          {
+            foreignKeyName: "session_events_player_out_id_fkey"
+            columns: ["player_out_id"]
+            isOneToOne: false
+            referencedRelation: "player_partner_stats"
+            referencedColumns: ["partner_id"]
+          },
+          {
+            foreignKeyName: "session_events_player_out_id_fkey"
+            columns: ["player_out_id"]
+            isOneToOne: false
+            referencedRelation: "player_partner_stats"
+            referencedColumns: ["player_id"]
+          },
+          {
+            foreignKeyName: "session_events_player_out_id_fkey"
+            columns: ["player_out_id"]
+            isOneToOne: false
+            referencedRelation: "player_stats"
+            referencedColumns: ["player_id"]
+          },
+          {
+            foreignKeyName: "session_events_player_out_id_fkey"
+            columns: ["player_out_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_events_player_out_id_fkey"
+            columns: ["player_out_id"]
+            isOneToOne: false
+            referencedRelation: "team_opponent_stats"
+            referencedColumns: ["opp_player1_id"]
+          },
+          {
+            foreignKeyName: "session_events_player_out_id_fkey"
+            columns: ["player_out_id"]
+            isOneToOne: false
+            referencedRelation: "team_opponent_stats"
+            referencedColumns: ["opp_player2_id"]
+          },
+          {
+            foreignKeyName: "session_events_player_out_id_fkey"
+            columns: ["player_out_id"]
+            isOneToOne: false
+            referencedRelation: "team_opponent_stats"
+            referencedColumns: ["team_player1_id"]
+          },
+          {
+            foreignKeyName: "session_events_player_out_id_fkey"
+            columns: ["player_out_id"]
+            isOneToOne: false
+            referencedRelation: "team_opponent_stats"
+            referencedColumns: ["team_player2_id"]
+          },
+          {
+            foreignKeyName: "session_events_player_out_id_fkey"
+            columns: ["player_out_id"]
+            isOneToOne: false
+            referencedRelation: "team_stats"
+            referencedColumns: ["player1_id"]
+          },
+          {
+            foreignKeyName: "session_events_player_out_id_fkey"
+            columns: ["player_out_id"]
+            isOneToOne: false
+            referencedRelation: "team_stats"
+            referencedColumns: ["player2_id"]
+          },
+          {
+            foreignKeyName: "session_events_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_events_team1_player1_id_fkey"
+            columns: ["team1_player1_id"]
+            isOneToOne: false
+            referencedRelation: "partner_filtered_ranking"
+            referencedColumns: ["partner_id"]
+          },
+          {
+            foreignKeyName: "session_events_team1_player1_id_fkey"
+            columns: ["team1_player1_id"]
+            isOneToOne: false
+            referencedRelation: "partner_filtered_ranking"
+            referencedColumns: ["player_id"]
+          },
+          {
+            foreignKeyName: "session_events_team1_player1_id_fkey"
+            columns: ["team1_player1_id"]
+            isOneToOne: false
+            referencedRelation: "player_opponent_stats"
+            referencedColumns: ["opponent_id"]
+          },
+          {
+            foreignKeyName: "session_events_team1_player1_id_fkey"
+            columns: ["team1_player1_id"]
+            isOneToOne: false
+            referencedRelation: "player_opponent_stats"
+            referencedColumns: ["player_id"]
+          },
+          {
+            foreignKeyName: "session_events_team1_player1_id_fkey"
+            columns: ["team1_player1_id"]
+            isOneToOne: false
+            referencedRelation: "player_partner_stats"
+            referencedColumns: ["partner_id"]
+          },
+          {
+            foreignKeyName: "session_events_team1_player1_id_fkey"
+            columns: ["team1_player1_id"]
+            isOneToOne: false
+            referencedRelation: "player_partner_stats"
+            referencedColumns: ["player_id"]
+          },
+          {
+            foreignKeyName: "session_events_team1_player1_id_fkey"
+            columns: ["team1_player1_id"]
+            isOneToOne: false
+            referencedRelation: "player_stats"
+            referencedColumns: ["player_id"]
+          },
+          {
+            foreignKeyName: "session_events_team1_player1_id_fkey"
+            columns: ["team1_player1_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_events_team1_player1_id_fkey"
+            columns: ["team1_player1_id"]
+            isOneToOne: false
+            referencedRelation: "team_opponent_stats"
+            referencedColumns: ["opp_player1_id"]
+          },
+          {
+            foreignKeyName: "session_events_team1_player1_id_fkey"
+            columns: ["team1_player1_id"]
+            isOneToOne: false
+            referencedRelation: "team_opponent_stats"
+            referencedColumns: ["opp_player2_id"]
+          },
+          {
+            foreignKeyName: "session_events_team1_player1_id_fkey"
+            columns: ["team1_player1_id"]
+            isOneToOne: false
+            referencedRelation: "team_opponent_stats"
+            referencedColumns: ["team_player1_id"]
+          },
+          {
+            foreignKeyName: "session_events_team1_player1_id_fkey"
+            columns: ["team1_player1_id"]
+            isOneToOne: false
+            referencedRelation: "team_opponent_stats"
+            referencedColumns: ["team_player2_id"]
+          },
+          {
+            foreignKeyName: "session_events_team1_player1_id_fkey"
+            columns: ["team1_player1_id"]
+            isOneToOne: false
+            referencedRelation: "team_stats"
+            referencedColumns: ["player1_id"]
+          },
+          {
+            foreignKeyName: "session_events_team1_player1_id_fkey"
+            columns: ["team1_player1_id"]
+            isOneToOne: false
+            referencedRelation: "team_stats"
+            referencedColumns: ["player2_id"]
+          },
+          {
+            foreignKeyName: "session_events_team1_player2_id_fkey"
+            columns: ["team1_player2_id"]
+            isOneToOne: false
+            referencedRelation: "partner_filtered_ranking"
+            referencedColumns: ["partner_id"]
+          },
+          {
+            foreignKeyName: "session_events_team1_player2_id_fkey"
+            columns: ["team1_player2_id"]
+            isOneToOne: false
+            referencedRelation: "partner_filtered_ranking"
+            referencedColumns: ["player_id"]
+          },
+          {
+            foreignKeyName: "session_events_team1_player2_id_fkey"
+            columns: ["team1_player2_id"]
+            isOneToOne: false
+            referencedRelation: "player_opponent_stats"
+            referencedColumns: ["opponent_id"]
+          },
+          {
+            foreignKeyName: "session_events_team1_player2_id_fkey"
+            columns: ["team1_player2_id"]
+            isOneToOne: false
+            referencedRelation: "player_opponent_stats"
+            referencedColumns: ["player_id"]
+          },
+          {
+            foreignKeyName: "session_events_team1_player2_id_fkey"
+            columns: ["team1_player2_id"]
+            isOneToOne: false
+            referencedRelation: "player_partner_stats"
+            referencedColumns: ["partner_id"]
+          },
+          {
+            foreignKeyName: "session_events_team1_player2_id_fkey"
+            columns: ["team1_player2_id"]
+            isOneToOne: false
+            referencedRelation: "player_partner_stats"
+            referencedColumns: ["player_id"]
+          },
+          {
+            foreignKeyName: "session_events_team1_player2_id_fkey"
+            columns: ["team1_player2_id"]
+            isOneToOne: false
+            referencedRelation: "player_stats"
+            referencedColumns: ["player_id"]
+          },
+          {
+            foreignKeyName: "session_events_team1_player2_id_fkey"
+            columns: ["team1_player2_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_events_team1_player2_id_fkey"
+            columns: ["team1_player2_id"]
+            isOneToOne: false
+            referencedRelation: "team_opponent_stats"
+            referencedColumns: ["opp_player1_id"]
+          },
+          {
+            foreignKeyName: "session_events_team1_player2_id_fkey"
+            columns: ["team1_player2_id"]
+            isOneToOne: false
+            referencedRelation: "team_opponent_stats"
+            referencedColumns: ["opp_player2_id"]
+          },
+          {
+            foreignKeyName: "session_events_team1_player2_id_fkey"
+            columns: ["team1_player2_id"]
+            isOneToOne: false
+            referencedRelation: "team_opponent_stats"
+            referencedColumns: ["team_player1_id"]
+          },
+          {
+            foreignKeyName: "session_events_team1_player2_id_fkey"
+            columns: ["team1_player2_id"]
+            isOneToOne: false
+            referencedRelation: "team_opponent_stats"
+            referencedColumns: ["team_player2_id"]
+          },
+          {
+            foreignKeyName: "session_events_team1_player2_id_fkey"
+            columns: ["team1_player2_id"]
+            isOneToOne: false
+            referencedRelation: "team_stats"
+            referencedColumns: ["player1_id"]
+          },
+          {
+            foreignKeyName: "session_events_team1_player2_id_fkey"
+            columns: ["team1_player2_id"]
+            isOneToOne: false
+            referencedRelation: "team_stats"
+            referencedColumns: ["player2_id"]
+          },
+          {
+            foreignKeyName: "session_events_team2_player1_id_fkey"
+            columns: ["team2_player1_id"]
+            isOneToOne: false
+            referencedRelation: "partner_filtered_ranking"
+            referencedColumns: ["partner_id"]
+          },
+          {
+            foreignKeyName: "session_events_team2_player1_id_fkey"
+            columns: ["team2_player1_id"]
+            isOneToOne: false
+            referencedRelation: "partner_filtered_ranking"
+            referencedColumns: ["player_id"]
+          },
+          {
+            foreignKeyName: "session_events_team2_player1_id_fkey"
+            columns: ["team2_player1_id"]
+            isOneToOne: false
+            referencedRelation: "player_opponent_stats"
+            referencedColumns: ["opponent_id"]
+          },
+          {
+            foreignKeyName: "session_events_team2_player1_id_fkey"
+            columns: ["team2_player1_id"]
+            isOneToOne: false
+            referencedRelation: "player_opponent_stats"
+            referencedColumns: ["player_id"]
+          },
+          {
+            foreignKeyName: "session_events_team2_player1_id_fkey"
+            columns: ["team2_player1_id"]
+            isOneToOne: false
+            referencedRelation: "player_partner_stats"
+            referencedColumns: ["partner_id"]
+          },
+          {
+            foreignKeyName: "session_events_team2_player1_id_fkey"
+            columns: ["team2_player1_id"]
+            isOneToOne: false
+            referencedRelation: "player_partner_stats"
+            referencedColumns: ["player_id"]
+          },
+          {
+            foreignKeyName: "session_events_team2_player1_id_fkey"
+            columns: ["team2_player1_id"]
+            isOneToOne: false
+            referencedRelation: "player_stats"
+            referencedColumns: ["player_id"]
+          },
+          {
+            foreignKeyName: "session_events_team2_player1_id_fkey"
+            columns: ["team2_player1_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_events_team2_player1_id_fkey"
+            columns: ["team2_player1_id"]
+            isOneToOne: false
+            referencedRelation: "team_opponent_stats"
+            referencedColumns: ["opp_player1_id"]
+          },
+          {
+            foreignKeyName: "session_events_team2_player1_id_fkey"
+            columns: ["team2_player1_id"]
+            isOneToOne: false
+            referencedRelation: "team_opponent_stats"
+            referencedColumns: ["opp_player2_id"]
+          },
+          {
+            foreignKeyName: "session_events_team2_player1_id_fkey"
+            columns: ["team2_player1_id"]
+            isOneToOne: false
+            referencedRelation: "team_opponent_stats"
+            referencedColumns: ["team_player1_id"]
+          },
+          {
+            foreignKeyName: "session_events_team2_player1_id_fkey"
+            columns: ["team2_player1_id"]
+            isOneToOne: false
+            referencedRelation: "team_opponent_stats"
+            referencedColumns: ["team_player2_id"]
+          },
+          {
+            foreignKeyName: "session_events_team2_player1_id_fkey"
+            columns: ["team2_player1_id"]
+            isOneToOne: false
+            referencedRelation: "team_stats"
+            referencedColumns: ["player1_id"]
+          },
+          {
+            foreignKeyName: "session_events_team2_player1_id_fkey"
+            columns: ["team2_player1_id"]
+            isOneToOne: false
+            referencedRelation: "team_stats"
+            referencedColumns: ["player2_id"]
+          },
+          {
+            foreignKeyName: "session_events_team2_player2_id_fkey"
+            columns: ["team2_player2_id"]
+            isOneToOne: false
+            referencedRelation: "partner_filtered_ranking"
+            referencedColumns: ["partner_id"]
+          },
+          {
+            foreignKeyName: "session_events_team2_player2_id_fkey"
+            columns: ["team2_player2_id"]
+            isOneToOne: false
+            referencedRelation: "partner_filtered_ranking"
+            referencedColumns: ["player_id"]
+          },
+          {
+            foreignKeyName: "session_events_team2_player2_id_fkey"
+            columns: ["team2_player2_id"]
+            isOneToOne: false
+            referencedRelation: "player_opponent_stats"
+            referencedColumns: ["opponent_id"]
+          },
+          {
+            foreignKeyName: "session_events_team2_player2_id_fkey"
+            columns: ["team2_player2_id"]
+            isOneToOne: false
+            referencedRelation: "player_opponent_stats"
+            referencedColumns: ["player_id"]
+          },
+          {
+            foreignKeyName: "session_events_team2_player2_id_fkey"
+            columns: ["team2_player2_id"]
+            isOneToOne: false
+            referencedRelation: "player_partner_stats"
+            referencedColumns: ["partner_id"]
+          },
+          {
+            foreignKeyName: "session_events_team2_player2_id_fkey"
+            columns: ["team2_player2_id"]
+            isOneToOne: false
+            referencedRelation: "player_partner_stats"
+            referencedColumns: ["player_id"]
+          },
+          {
+            foreignKeyName: "session_events_team2_player2_id_fkey"
+            columns: ["team2_player2_id"]
+            isOneToOne: false
+            referencedRelation: "player_stats"
+            referencedColumns: ["player_id"]
+          },
+          {
+            foreignKeyName: "session_events_team2_player2_id_fkey"
+            columns: ["team2_player2_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_events_team2_player2_id_fkey"
+            columns: ["team2_player2_id"]
+            isOneToOne: false
+            referencedRelation: "team_opponent_stats"
+            referencedColumns: ["opp_player1_id"]
+          },
+          {
+            foreignKeyName: "session_events_team2_player2_id_fkey"
+            columns: ["team2_player2_id"]
+            isOneToOne: false
+            referencedRelation: "team_opponent_stats"
+            referencedColumns: ["opp_player2_id"]
+          },
+          {
+            foreignKeyName: "session_events_team2_player2_id_fkey"
+            columns: ["team2_player2_id"]
+            isOneToOne: false
+            referencedRelation: "team_opponent_stats"
+            referencedColumns: ["team_player1_id"]
+          },
+          {
+            foreignKeyName: "session_events_team2_player2_id_fkey"
+            columns: ["team2_player2_id"]
+            isOneToOne: false
+            referencedRelation: "team_opponent_stats"
+            referencedColumns: ["team_player2_id"]
+          },
+          {
+            foreignKeyName: "session_events_team2_player2_id_fkey"
+            columns: ["team2_player2_id"]
+            isOneToOne: false
+            referencedRelation: "team_stats"
+            referencedColumns: ["player1_id"]
+          },
+          {
+            foreignKeyName: "session_events_team2_player2_id_fkey"
+            columns: ["team2_player2_id"]
+            isOneToOne: false
+            referencedRelation: "team_stats"
+            referencedColumns: ["player2_id"]
+          },
+        ]
+      }
+      sessions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          played_at: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          played_at?: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          played_at?: string
+          status?: string
         }
         Relationships: []
       }
