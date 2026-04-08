@@ -18,6 +18,8 @@ const NAV_LINKS = [
   { label: "Teams", to: "/teams" as const },
   { label: "Matches", to: "/matches" as const },
   { label: "Stats", to: "/stats" as const },
+  { label: "Report", to: "/report" as const },
+  { label: "Fixture", to: "/fixture" as const },
 ];
 
 export function Navbar() {
